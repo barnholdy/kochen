@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Pie Chart</title>
+    <!--[if IE]>
+    <script type="text/javascript" src="../sizzle.min.js"></script>
+    <script type="text/javascript" src="../es5-shim.min.js"></script>
+    <![endif]-->
+    <script type="text/javascript" src="js/raphael-min.js"></script>
+    <script type="text/javascript" src="js/d3.v2.js"></script>
+  </head>
+  <body>
+    <script type="text/javascript">
+    var width = 400,
+        height = 400,
+        outerRadius = Math.min(width, height) / 2,
+        innerRadius = outerRadius * .6,
+        data = d3.range(10).map(Math.random),
+        color = d3.scale.category20(),
+        donut = d3.layout.pie(),
+        arc = d3.svg.arc().innerRadius(innerRadius).outerRadius(outerRadius);
+
+	    var vis = Raphael(0, 0, width, height);
+	    vis.setStart()
+	    d3.layout.pie()(data).forEach(function(d, i) {
+	      vis.path(arc(d))
+	        .attr({ fill: color(i), 'stroke-opacity': 0 });
+	
+	      var pos = arc.centroid(d);
+	      vis.text(pos[0], pos[1], d.value.toFixed(2))
+	        .attr({ opacity:  d.value > .15 ? 1 : 0})
+	    });
+	    vis.setFinish().transform(['t', outerRadius, outerRadius])
+    </script>
+  </body>
+</html>

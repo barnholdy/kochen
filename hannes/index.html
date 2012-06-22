@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>untitled</title>
+	<meta name="generator" content="TextMate http://macromates.com/">
+	<meta name="author" content="Hannes">
+	
+	<script type="text/javascript" src="raphael-min.js"></script>
+	<script type="text/javascript" src="food.tomato.js"></script>
+	<script type="text/javascript" src="food.onion.js"></script>
+	<script>
+	
+		window.onload = function(){
+			
+			var paper = Raphael(0,0,"100%", "100%");
+			
+			//add own methods to elements
+			//Raphael.el
+			
+			const SELECTION_ID = "selection";
+			const ELLIPSES_ID = "ellipses";
+			const ELLIPSES_CLASS = "ellipses";
+			
+			const FOOD_TOMATO = "tomato";
+			const FOOD_ONION = "onion";
+			
+			var center_x = 300;
+			var center_y = 100;
+			var selection = createSelection(center_x, center_y);
+			paper.set(selection).drag(selection.move, selection.start, selection.up);
+			
+			//contains ellipse ids
+			var ellipses = new Array();
+			
+			var tomato = createFood(FOOD_TOMATO, 12, 120);
+			tomato.lookAt(center_x, center_y);
+			paper.set(tomato).drag(tomato.move, tomato.start, tomato.up);
+			
+			var tomato = createFood(FOOD_TOMATO, 102, 220);
+			tomato.lookAt(center_x, center_y);
+			paper.set(tomato).drag(tomato.move, tomato.start, tomato.up);
+			
+			var onion = createFood(FOOD_ONION, 402, 320);
+			onion.lookAt(center_x, center_y);
+			paper.set(onion).drag(onion.move, onion.start, onion.up);
+			
+			var onion = createFood(FOOD_ONION, 302, 400);
+			onion.lookAt(center_x, center_y);
+			paper.set(onion).drag(onion.move, onion.start, onion.up);			
+			
+			function createEllipse(x, y){
+				
+				var ellipse = paper.path("M"+(x+50)+","+(y)+"c-28,0-50,11.193-50,25s22,25,50,25V"+(y)+"z");
+				ellipse.attr({'stroke-width': '0','stroke-opacity': '1','fill': '#000000'});
+				
+				ellipse.node.setAttribute('class', ELLIPSES_CLASS);
+				ellipse.attr("class", "ELLIPSES_CLASS");
+				
+				ellipse.x=x;
+				ellipse.y=y;
+				ellipse.angle=0;
+				ellipse.quadrant=0;
+				ellipse.anglePlus=0;
+				
+				ellipse.start = function(){
+					this.eox = this.x;
+					this.eoy = this.y;
+					this.animate({opacity:0.5}, 100, ">");
+				}
+				ellipse.move = function(dx, dy){
+					this.x=this.eox+dx;
+					this.y=this.eoy+dy;
+					this.attr({path: "M"+(this.x+50)+","+(this.y)+"c-28,0-50,11.193-50,25s22,25,50,25V"+(this.y)+"z"});
+					
+					this.myRotate(paper.getById(SELECTION_ID).attr("x"), paper.getById(SELECTION_ID).attr("y"))
+				}
+				ellipse.myRotate = function(toX, toY, lookAtSelection){
+					
+					if(lookAtSelection == undefined){
+						lookAtSelection = true;
+					}
+					
+					console.log("rotate, tox: " + toX + ", toy: " + toY + ", lookAtSelection: " + lookAtSelection);
+					
+					var r=this.y-this.x;
+					var normalX = this.x+1;
+					var normalY = Math.tan(0)*normalX+r;
+
+					var normalXn = normalX-this.x;
+					var normalYn = normalY-this.y;
+
+					if(this.x>paper.getById(SELECTION_ID).attr("x")){
+						var xN = this.x-toX;
+						var yN = this.y-toY;
+					}
+					else{
+						var xN = toX-this.x;
+						var yN = toY-this.y;
+					}
+
+					var rotate = Math.acos(
+						(xN*normalXn+yN*normalYn)/
+						(Math.sqrt(Math.pow(xN,2)+Math.pow(yN,2))*Math.sqrt(Math.pow(normalXn,2)+Math.pow(normalYn,2)))
+					)/Math.PI*180;
+
+					//align
+					if(this.x>toX){
+						rotate = rotate+90;
+					}
+					else{
+						rotate = rotate-90;
+					}
+
+					//point with tip
+					if(lookAtSelection){
+						rotate = rotate+180;
+					}
+
+					//provide fluet rotation
+					var new_quadrant;
+					if(this.x<=toX && this.y<=toY){
+						new_quadrant=0;
+					}
+					else if(this.x>toX && this.y<=toY){
+						new_quadrant=1;
+					}
+					else if(this.x>toX && this.y>toY){
+						new_quadrant=2;
+					}
+					else if(this.x<=toX && this.y>toY){
+						new_quadrant=3;
+					}
+					if(this.quadrant==2 && new_quadrant==3){
+						this.anglePlus=this.anglePlus+360;
+					}
+					if(this.quadrant==3 && new_quadrant==2){
+						this.anglePlus=this.anglePlus-360;
+					}
+					rotate=rotate+this.anglePlus;
+					this.quadrant=new_quadrant;
+
+					this.angle=rotate;	
+
+					//document.getElementById("debug").innerHTML = "toX: "+toX+"<br> toY: "+toY+"<br> cx: "+this.x+"<br> cy: "+this.y+"<br> vx: "+normalX+"<br> vy"+normalY+"<br> nx: "+normalXn+"<br> ny: "+normalYn+"<br> r: "+r+"<br> rotate"+rotate+"<br> angle"+this.angle+"<br> quadrant: "+this.quadrant;
+
+					//rotate
+					this.animate({transform: "r" + rotate}, 200);
+					//this.rotate(rotate);
+				}
+				ellipse.up = function(){
+					this.animate({opacity:1}, 100, ">");
+					this.eox = this.x;
+					this.eoy = this.y;
+				}
+				
+				return ellipse;
+			}
+			
+			function createSelection(x, y){
+				
+				var selection = paper.rect(x, y, 50, 50);
+				selection.attr("fill", "#f00");
+				selection.id = SELECTION_ID;
+				
+				selection.start = function(){
+					this.sox = this.attr("x");
+					this.soy = this.attr("y");
+					this.animate({opacity:0.5}, 100, ">");
+				}
+				selection.move = function(dx, dy){
+					this.attr({x: this.sox + dx , y: this.soy + dy});
+					
+					//rotate ellipses
+					for (var i in ellipses){
+						var ellipse = paper.getById(ellipses[i]);
+						ellipse.myRotate(this.attr("x"), this.attr("y"));
+					}
+				}
+				selection.up = function(){
+					this.animate({opacity:1}, 100, ">");
+				}
+				
+				return selection;
+			}
+			
+			function createFood(type, x, y){
+				
+				var ellipse = createEllipse(x, y);
+				ellipses.push(ellipse.id);
+				
+				var food = undefined;
+				
+				switch (type) {
+					case FOOD_TOMATO:
+						food = createTomato(paper);
+				    break;
+					case FOOD_ONION:
+						food = createOnion(paper);
+				    break;
+				}
+				
+				food.transform("t"+x+","+y);
+				food.attr("x", x);
+				food.attr("y", y);
+				
+				food.start = function(){
+					this.sox = this.attr("x");
+					this.soy = this.attr("y");
+					
+					ellipse.start();
+				}
+				food.move = function(dx, dy){
+					food.transform("t"+(this.sox+dx)+","+(this.soy+dy));
+					//save values
+					this.attr("x", this.sox+dx);
+					this.attr("y", this.soy+dy);
+					
+					ellipse.move(dx,dy);
+				}
+				food.up = function(){
+					ellipse.up();
+				}
+				food.lookAt = function(x, y){
+					ellipse.myRotate(x, y);
+				}
+				
+				return food;
+			}
+		}
+	
+	</script>
+	
+</head>
+<body>
+<div id="debug" style="margin-left:100px;"></div>
+
+
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>untitled</title>
+	<meta name="generator" content="TextMate http://macromates.com/">
+	<meta name="author" content="Hannes">
+	
+	<script type="text/javascript" src="raphael-min.js"></script>
+	<script type="text/javascript" src="jsGeForMT_v1.0b.min.js"></script>
+	
+	<script>
+	
+		window.onload = function(){
+			
+			var settings = {
+				feedback: false
+			}
+			var gestures = {
+				circle: {
+					identifier: "circle",
+					expr: "1F(CIRCLE)",
+					handler: function(e){
+						
+						var midPoint = e.getMidPoint();
+						createSquare(midPoint.x,midPoint.y);
+						
+						GeForMT.addGesture({
+							identifier: "move",
+							expr: "1F(MOVE(rect))",
+							online: true,
+							handler: function(e){
+								
+								var touch=e.currentEvent.touches[0];
+								var x=touch.pageX;
+								var y=touch.pageY;
+								
+								var rect=paper.getById(e.target.raphaelid);
+								
+								rect.attr({x: x-25, y: y-25});
+							}
+						});
+					}
+				}
+			}
+			
+			GeForMT.init(gestures,settings);
+			GeForMT.addRecognitionFailedEventListener(
+				function(){
+				}
+			);
+			
+			
+			var paper = Raphael(0,0,"100%", "100%");
+			
+			function createSquare(x,y){
+				var square = paper.rect(x, y, 50, 50);
+				square.attr("fill", "#f00");
+				/*
+				var startSquare = function(){
+					this.sox = this.attr("x");
+					this.soy = this.attr("y");
+					this.animate({opacity:0.5}, 100, ">");
+				}
+				var moveSquare = function(dx, dy){
+					this.attr({x: this.sox + dx , y: this.soy + dy});
+				}
+				var upSquare = function(){
+					this.animate({opacity:1}, 100, ">");
+					center_x = this.attr("x");
+					center_y = this.attr("y");
+				}
+				paper.set(square).drag(moveSquare, startSquare, upSquare);
+				*/
+			}
+			
+		}
+	
+	</script>
+	
+</head>
+<body>
+<div id="debug" style="margin-left:100px;">test</div>
+
+
+</body>
+</html>

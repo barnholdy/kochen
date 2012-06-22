@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Data test</title>
+    <script type="text/javascript" src="js/raphael-min.js"></script>
+    <script type="text/javascript" src="js/d3.v2.js"></script>
+  </head>
+  <body>
+  	<div id="viz"></div>
+    <script type="text/javascript">
+   
+    var dataset = [],
+	tmpDataset = [],
+	i, j;
+	
+	for (i = 0; i < 5; i++) {
+	    for (j = 0, tmpDataset = []; j < 3; j++) {
+	        tmpDataset.push("Row:"+i+",Col:"+j);
+	    }
+	    dataset.push(tmpDataset);
+	}
+		
+	d3.select("#viz")
+	    .append("table")
+	    .style("border-collapse", "collapse")
+	    .style("border", "2px black solid")
+	    
+	    .selectAll("tr")
+	    .data(dataset)
+	    .enter().append("tr")
+	    
+	    .selectAll("td")
+	    .data(function(d){return d;})
+	    .enter().append("td")
+	    .style("border", "1px black solid")
+	    .style("padding", "10px")
+	    .on("mouseover", function(){d3.select(this).style("background-color", "aliceblue")}) 
+	    .on("mouseout", function(){d3.select(this).style("background-color", "white")}) 
+	    .text(function(d){return d;})
+	    .style("font-size", "12px");
+	    
+	    var matrix = [
+		  [11975,  5871, 8916, 2868],
+		  [ 1951, 10048, 2060, 6171],
+		  [ 8010, 16145, 8090, 8045],
+		  [ 1013,   990,  940, 6907]
+		];
+		
+		var tr = d3.select("body").append("table").selectAll("tr")
+		    .data(matrix)
+		    .enter().append("tr");
+		
+		var td = tr.selectAll("td")
+		    .data(function(d) { return d; })
+		    .enter().append("td")
+		    .text(function(d) { return d; });
+   
+    </script>
+  </body>
+</html>

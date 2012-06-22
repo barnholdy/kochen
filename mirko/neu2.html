@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Data test</title>
+    <script type="text/javascript" src="js/raphael-min.js"></script>
+    <script type="text/javascript" src="js/d3.v2.js"></script>
+  </head>
+  <body>
+  	 <style type="text/css">
+		.viz rect {
+			fill: steelblue;
+			stroke: white;
+		}
+
+		.viz text {
+			font: 10px sans-serif;
+		}
+		
+		.viz circle {
+			fill: #c0c0c0;
+			stroke: white;
+		}
+		
+		.viz selected {
+			fill: #999999;
+			stroke: white;
+		}
+
+    </style>
+    <script type="text/javascript">
+    
+    //var w, h = 500;
+    
+    var data = [120, 100, 150, 200, 50, 3, 66];
+    var names = ["a", "b", "c", "d", "e", "f"];
+    
+    var svg = d3.select("body").append("svg")
+    	.attr("class", "viz")
+    	.attr("width", "100%")
+    	.attr("height", "100%");
+    	
+    // This helper function defines the initial shape of any new datapoints
+	function circle_factory(selection) {
+	    selection.attr("class","series")
+	        .attr("cy", function(d, i) {
+		    	var y = d*Math.sin(i*360/data.length) + 250;
+		    	console.debug("y: " + y);
+		    	return y;})
+		    .attr("cx", function(d, i) {
+		    	var x = d*Math.cos(i*360/data.length) + 250;
+		    	console.debug("x: " + x);
+		    	return x;
+		    })
+		    .attr("r", 5)
+		    .on('click', function(d,i) {
+	    		d3.select(this).style('fill','red');
+	    		})
+	        .attr("ObjectID",function(d) {return d.id;})  // for easy debugging/monitoring
+	        .attr("r",5)
+	}
+    
+    // enter() passes on all data not reflected already (by key) in the selection
+	// here all data points are passed on, and we append a circle for each
+	var c=svg.selectAll(".series").data(data)
+	    .enter().append("svg:circle").call(circle_factory); 
+        
+	/*circle.enter().append("circle")
+	    .attr("cy", function(d, i) {
+	    	var y = d*Math.sin(i*360/data.length) + 250;
+	    	console.debug("y: " + y);
+	    	return y;})
+	    .attr("cx", function(d, i) {
+	    	var x = d*Math.cos(i*360/data.length) + 250;
+	    	console.debug("x: " + x);
+	    	return x;
+	    })
+	    .attr("r", 5)
+	    .on('click', function(d,i) {
+	    d3.select(this).style('fill','red');
+	  });*/
+	 
+	
+	/*circle.selectAll("text")
+		.data(data)
+		.enter().append("text")
+		.text( function(d) { return "dsjfkds"; });
+
+   circle.exit().remove();*/
+     
+     
+     
+     
+    </script>
+  </body>
+</html>
