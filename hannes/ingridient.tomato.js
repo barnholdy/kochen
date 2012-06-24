@@ -1,4 +1,7 @@
-createTomato = function(rsr){
+
+Gui.INGREDIENT_TOMATO = "createTomato";
+
+function createTomato(rsr){
 	
 //((path_[a-z]{1,2})\..*?;)
 /*
@@ -23,6 +26,9 @@ $1
 	var path_g = rsr.path("M15.957,8.355c0.552-1.331,0.727-3.017,0.792-4.481C16.798,2.753,16.032,0.93,16.873,0    c1.081,0.289,0.701,1.386,0.574,2.233c-0.14,0.943-0.013,1.938-0.139,2.892C17.2,5.942,17.079,9.47,15.965,9.424    C15.954,9.062,15.796,8.728,15.957,8.355");
 	path_g.attr({fill: '#429348',parent: 'tomato','stroke-width': '0','stroke-opacity': '1'}).data('id', 'path_g');
 	tomato.push(path_g);
-		
+	
+	tomato.offsetX = 20;
+	tomato.offsetY = 18;
+	
 	return tomato;
 }
