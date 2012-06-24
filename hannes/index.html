@@ -9,8 +9,8 @@
 	<script type="text/javascript" src="raphael-min.js"></script>
 	
 	<script type="text/javascript" src="gui.js"></script>
-	<script type="text/javascript" src="ingridient.tomato.js"></script>
-	<script type="text/javascript" src="ingridient.onion.js"></script>
+	<script type="text/javascript" src="ingredient.tomato.js"></script>
+	<script type="text/javascript" src="ingredient.onion.js"></script>
 	
 	<script>
 	
@@ -23,17 +23,42 @@
 			var center_y = 100;
 			var selection = gui.createSelection(center_x, center_y);
 			
-			var tomato = gui.createIngridient(Gui.INGREDIENT_TOMATO, 12, 120);
-			tomato.lookAt(center_x, center_y);
+			var tomato = gui.createIngredient(Gui.INGREDIENT_TOMATO, 12, 120);
+			tomato.lookAt(center_x, center_y, true);
 			
-			var tomato = gui.createIngridient(Gui.INGREDIENT_TOMATO, 102, 220);
-			tomato.lookAt(center_x, center_y);
+			var tomato = gui.createIngredient(Gui.INGREDIENT_TOMATO, 102, 220);
+			tomato.lookAt(center_x, center_y, true);
 			
-			var onion = gui.createIngridient(Gui.INGREDIENT_ONION, 402, 320);
-			onion.lookAt(center_x, center_y);
+			var onion = gui.createIngredient(Gui.INGREDIENT_ONION, 402, 320);
+			onion.lookAt(center_x, center_y, true);
 			
-			var onion = gui.createIngridient(Gui.INGREDIENT_ONION, 302, 400);
-			onion.lookAt(center_x, center_y);
+			var onion = gui.createIngredient(Gui.INGREDIENT_ONION, 302, 400);
+			onion.lookAt(center_x, center_y, false);
+			
+			
+			var drag = function(target){
+				//console.log("drag: "+target.id);
+				
+				var ingredients = gui.getIngredients();
+				for(i in ingredients){
+					var ingredient = ingredients[i];
+					if(ingredient.id != target.id){
+						ingredient.lookAt(target.x, target.y, true);
+					}
+				}
+			};
+			gui.addEventListerner(Gui.eventTypeDrag, drag);
+			
+			var drop = function(target){
+				//console.log("drop: "+target.id);
+				
+				var ingredients = gui.getIngredients();
+				for(i in ingredients){
+					var ingredient = ingredients[i];
+					ingredient.lookAt(selection.attr("x"), selection.attr("y"), true);
+				}
+			};
+			gui.addEventListerner(Gui.eventTypeDrop, drop);
 			
 		}
 	

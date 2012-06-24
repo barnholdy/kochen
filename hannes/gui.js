@@ -1,9 +1,16 @@
 function Gui(paper) {
    	
+	var that = this;
+
 	this.paper = paper;
 	
+	this.ingredients = new Array();
+	this.ellipse_ids = new Array();
+	
 	//contains ellipse ids
-	this.ellipses = new Array();
+	this.ellipse_ids = new Array();
+	
+	this.eventListeners = new Array();
 	
 	this.createEllipse = function(x, y){
 
@@ -28,18 +35,18 @@ function Gui(paper) {
 			
 			//console.log(Gui.SELECTION_ID);
 			
-			this.myRotate(this.paper.getById(Gui.SELECTION_ID).attr("x"), this.paper.getById(Gui.SELECTION_ID).attr("y"));
+			this.rotate(this.paper.getById(Gui.SELECTION_ID).attr("x"), this.paper.getById(Gui.SELECTION_ID).attr("y"));
 		};
 		ellipse.up = function(){
 		};
 
-		ellipse.myRotate = function(toX, toY, lookAtSelection){
+		ellipse.rotate = function(toX, toY, lookAtSelection){
 
 			if(lookAtSelection == undefined){
 				lookAtSelection = true;
 			}
 
-			console.log("rotate, tox: " + toX + ", toy: " + toY + ", lookAtSelection: " + lookAtSelection);
+			//console.log("rotate, tox: " + toX + ", toy: " + toY + ", lookAtSelection: " + lookAtSelection);
 
 			var r=this.y-this.x;
 			var normalX = this.x+1;
@@ -119,7 +126,9 @@ function Gui(paper) {
 			//this.arrow.animate({transform: "r" + rotate}, 200);
 			this.transform("t"+this.x+","+this.y+"r" + rotate);
 		};
-
+		
+		this.ellipse_ids.push(ellipse.id);
+		
 		return ellipse;
 	};
 
@@ -138,9 +147,9 @@ function Gui(paper) {
 			this.attr({x: this.sox + dx , y: this.soy + dy});
 
 			//rotate ellipses
-			for (var i in this.ellipses){
-				var ellipse = this.paper.getById(this.ellipses[i]);
-				ellipse.myRotate(this.attr("x"), this.attr("y"));
+			for (var i in that.ellipse_ids){
+				var ellipse = this.paper.getById(that.ellipse_ids[i]);
+				ellipse.rotate(this.attr("x"), this.attr("y"));
 			}
 		};
 		selection.up = function(){
@@ -152,38 +161,75 @@ function Gui(paper) {
 		return selection;
 	};
 
-	this.createIngridient = function(func, x, y){
+	this.createIngredient = function(func, x, y){
 
-		var ingridient = ingridient = window[func].apply(null, [this.paper]);		
-		ingridient.transform("t"+(x-ingridient.offsetX)+","+(y-ingridient.offsetY));
-
-		var ellipse = this.createEllipse(x-ingridient.offsetX, y-ingridient.offsetY);
-		ellipse.toBack();
-		this.ellipses.push(ellipse.id);
-
-		ingridient.start = function(x, y){
-			ellipse.start(x, y);
+		var ingredient = window[func].apply(null, [this.paper]);		
+		ingredient.transform("t"+(x-ingredient.offsetX)+","+(y-ingredient.offsetY));
+		ingredient.id = this.ingredients.length
+		ingredient.ellipse = this.createEllipse(x-ingredient.offsetX, y-ingredient.offsetY);
+		ingredient.ellipse.toBack();
+		
+		ingredient.start = function(x, y){
+			ingredient.ellipse.start(x, y);
 		};
-		ingridient.move = function(dx, dy, x, y){
-			ingridient.transform("t"+(x-ingridient.offsetX)+","+(y-ingridient.offsetY));
-			this.attr("x", x);
-			this.attr("y", y);
+		ingredient.move = function(dx, dy, x, y){
+			ingredient.transform("t"+(x-ingredient.offsetX)+","+(y-ingredient.offsetY));
+			ingredient.attr("x", x);
+			ingredient.attr("y", y);
+			ingredient.x=x;
+			ingredient.y=y;
 
-			ellipse.move(dx,dy, x-ingridient.offsetX, y-ingridient.offsetY);
+			ingredient.ellipse.move(dx,dy, x-ingredient.offsetX, y-ingredient.offsetY);
+			
+			that.fireEvent(ingredient, Gui.eventTypeDrag);
 		};
-		ingridient.up = function(){
-			ellipse.up();
+		ingredient.up = function(){
+			ingredient.ellipse.up();
+			
+			that.fireEvent(ingredient, Gui.eventTypeDrop);
 		};
-		ingridient.lookAt = function(x, y){
-			ellipse.myRotate(x, y);
+		ingredient.lookAt = function(x, y, face){
+			ingredient.ellipse.rotate(x, y, face);
 		};
-
-		ingridient.drag(ingridient.move, ingridient.start, ingridient.up);
-
-		return ingridient;
+		ingredient.drag(ingredient.move, ingredient.start, ingredient.up);
+		
+		this.ingredients[ingredient.id] = ingredient;
+		
+		return ingredient;
 	};
+	
+	
+	this.getIngredient = function(id){
+		
+		return this.ingredients[id];
+	}
+	
+	this.getIngredients = function(){
+		
+		return this.ingredients;
+	}
+	
+	this.addEventListerner = function(type, callback){
+		
+		this.eventListeners.push({"type" : type, "callback" : callback});
+	}
+	
+	this.fireEvent = function(target, type){
+		
+		for(i in this.eventListeners){
+			
+			var eventListener = this.eventListeners[i];
+			
+			if(eventListener.type == type){
+				
+				eventListener.callback(target);
+			}
+		}
+	}
 }
 
 
 Gui.SELECTION_ID = "selection";
 Gui.ELLIPSES_CLASS = "ellipses";
+Gui.eventTypeDrag = "drag";
+Gui.eventTypeDrop = "drop";
