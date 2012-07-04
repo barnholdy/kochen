@@ -11,6 +11,19 @@
 	<script type="text/javascript" src="gui.js"></script>
 	<script type="text/javascript" src="ingredient.tomato.js"></script>
 	<script type="text/javascript" src="ingredient.onion.js"></script>
+	<script type="text/javascript" src="ingredient.stripe.js"></script>
+	
+	<style type="text/css">
+		
+		.stripe {
+			stroke-width: 0;
+			fill:   #008BD2;
+		}
+		
+		
+		
+		
+	</style>
 	
 	<script>
 	
@@ -34,6 +47,9 @@
 			
 			var onion = gui.createIngredient(Gui.INGREDIENT_ONION, 302, 400);
 			onion.lookAt(center_x, center_y, false);
+			
+			var stripe = gui.createIngredient(Gui.INGREDIENT_STRIPE, 102, 400);
+			stripe.lookAt(center_x, center_y, false);
 			
 			
 			var drag = function(target){

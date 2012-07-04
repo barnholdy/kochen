@@ -39,7 +39,7 @@ function Gui(paper) {
 		};
 		ellipse.up = function(){
 		};
-
+		
 		ellipse.rotate = function(toX, toY, lookAtSelection){
 
 			if(lookAtSelection == undefined){
@@ -168,17 +168,24 @@ function Gui(paper) {
 		ingredient.id = this.ingredients.length
 		ingredient.ellipse = this.createEllipse(x-ingredient.offsetX, y-ingredient.offsetY);
 		ingredient.ellipse.toBack();
+		ingredient.angle=0;
+		ingredient.quadrant=0;
+		ingredient.anglePlus=0;
+		
 		
 		ingredient.start = function(x, y){
 			ingredient.ellipse.start(x, y);
 		};
 		ingredient.move = function(dx, dy, x, y){
 			ingredient.transform("t"+(x-ingredient.offsetX)+","+(y-ingredient.offsetY));
-			ingredient.attr("x", x);
-			ingredient.attr("y", y);
+			//ingredient.attr("x", x);
+			//ingredient.attr("y", y);
 			ingredient.x=x;
 			ingredient.y=y;
-
+			
+			//destroy ingredient images
+			ingredient.rotate(this.paper.getById(Gui.SELECTION_ID).attr("x"), this.paper.getById(Gui.SELECTION_ID).attr("y"));
+			
 			ingredient.ellipse.move(dx,dy, x-ingredient.offsetX, y-ingredient.offsetY);
 			
 			that.fireEvent(ingredient, Gui.eventTypeDrag);
@@ -191,12 +198,106 @@ function Gui(paper) {
 		ingredient.lookAt = function(x, y, face){
 			ingredient.ellipse.rotate(x, y, face);
 		};
+		
+		
+		ingredient.rotate = function(toX, toY, lookAtSelection){
+
+			if(lookAtSelection == undefined){
+				lookAtSelection = true;
+			}
+
+			//console.log("rotate, tox: " + toX + ", toy: " + toY + ", lookAtSelection: " + lookAtSelection);
+
+			var r=this.y-this.x;
+			var normalX = this.x+1;
+			var normalY = Math.tan(0)*normalX+r;
+
+			var normalXn = normalX-this.x;
+			var normalYn = normalY-this.y;
+
+			if(this.x>toX){
+				var xN = this.x-toX;
+				var yN = this.y-toY;
+			}
+			else{
+				var xN = toX-this.x;
+				var yN = toY-this.y;
+			}
+
+			var rotate = Math.acos(
+				(xN*normalXn+yN*normalYn)/
+				(Math.sqrt(Math.pow(xN,2)+Math.pow(yN,2))*Math.sqrt(Math.pow(normalXn,2)+Math.pow(normalYn,2)))
+			)/Math.PI*180;
+			
+			//align
+			if(this.x>toX){
+				rotate = rotate+90;
+			}
+			else{
+				rotate = rotate-90;
+			}
+			
+			//point with tip
+			if(lookAtSelection){
+				rotate = rotate+180;
+			}
+			
+			//provide fluet rotation
+			var new_quadrant;
+			if(this.x<=toX && this.y<=toY){
+				new_quadrant=0;
+			}
+			else if(this.x>toX && this.y<=toY){
+				new_quadrant=1;
+			}
+			else if(this.x>toX && this.y>toY){
+				new_quadrant=2;
+			}
+			else if(this.x<=toX && this.y>toY){
+				new_quadrant=3;
+			}
+			if(this.quadrant==2 && new_quadrant==3){
+				this.anglePlus=this.anglePlus+360;
+			}
+			if(this.quadrant==3 && new_quadrant==2){
+				this.anglePlus=this.anglePlus-360;
+			}
+			rotate=rotate+this.anglePlus;
+			this.quadrant=new_quadrant;
+
+			this.angle=rotate;	
+
+			/*
+			console.log("toX: "+toX);
+			console.log("toY: "+toY);
+			console.log("cx: "+this.x);
+			console.log("cy: "+this.y);
+			console.log("vx: "+normalX);
+			console.log("vy"+normalY);
+			console.log("nx: "+normalXn);
+			console.log("ny: "+normalYn);
+			console.log("xN: "+xN);
+			console.log("yN: "+yN);
+			console.log("r: "+r);
+			console.log("rotate: "+rotate);
+			console.log("angle: "+this.angle);
+			console.log("quadrant: "+this.quadrant);
+			*/
+
+			//rotate
+			//this.arrow.animate({transform: "r" + rotate}, 200);
+			this.transform("t"+(this.x-this.offsetX)+","+(this.y-this.offsetY)+"r" + rotate);
+		};
+		
+		
 		ingredient.drag(ingredient.move, ingredient.start, ingredient.up);
 		
 		this.ingredients[ingredient.id] = ingredient;
 		
 		return ingredient;
 	};
+	
+	
 	
 	
 	this.getIngredient = function(id){
